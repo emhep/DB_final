@@ -18,6 +18,9 @@ public class AnimeList {
 	}
 	
 	public static void loadData() throws FileNotFoundException {
+		if(animes.size() > 0) {
+			return;
+		}
 		FileReader file = new FileReader("AnimeList.csv");
 		Scanner sc = new Scanner(file);
 		
@@ -28,7 +31,7 @@ public class AnimeList {
 			colNames.add(col);
 		}
 		
-		System.out.println(colNames.size() + " cols of anime data");
+		//System.out.println(colNames.size() + " cols of anime data");
 		
 		int numBadLen = 0;
 		int numGoodLen = 0;
@@ -99,22 +102,24 @@ public class AnimeList {
 			// The japanese title
 			difInc = 0;
 			String title_japanese = "";
-			if(!line[dif + 3].equals("") && line[dif + 3].charAt(0) == '"') {
+			if(!line[dif + 3].equals("") && line[dif + 3].charAt(0) == '"') { // If the line contains data and starts with a "
 				for(int i = 3; i + dif < line.length; i++) {
-					if(i != 3) {
+					if(i != 3) { // Increment a variable to increase the offset for where the current data is after the loop
 						difInc += 1;
 					}
 
+					// Add to the list for that field
 					title_japanese += line[dif + i] + ",";
 
+					// If the last char is a ", end the loop
 					if(line[dif + i].charAt(line[dif + i].length()-1) == '"') {
 						break;
 					}
 				}
 				dif += difInc;
-				title_japanese = title_japanese.substring(1, title_japanese.length()-3);
-			} else {
-				title_japanese = line[dif + 3];
+				title_japanese = title_japanese.substring(1, title_japanese.length()-3); // Cut out the beginning and ending "
+			} else { // Not a list of data
+				title_japanese = line[dif + 3]; // Just put the data into the a string
 			}
 			anime.setTitle_japanese(title_japanese);
 			
@@ -122,13 +127,15 @@ public class AnimeList {
 			int endOfAltNames = -1;
 			String altNames;
 			boolean usedAltEndBound = false;
-			if(!line[dif + 4].equals("")) {
+			if(!line[dif + 4].equals("")) { // If there are alt names
+				// Find the image url column
 				for(int i = 5; i + dif < line.length; i++) {
 					if(line[dif + i].length() >= 4 && line[dif + i].substring(0,4).toLowerCase().equals("http")){
 						endOfAltNames = i; // the image url which is the next col
 						break;
 					}
 				}
+				// If the image url column was not found, find the media type column
 				if(endOfAltNames == -1) {
 					for(int i = 6; i + dif < line.length; i++) {
 						if(line[dif + i].toLowerCase().equals("tv") || line[dif + i].toLowerCase().equals("movie") || line[dif + i].toLowerCase().equals("ona") || line[dif + i].toLowerCase().equals("ova") || line[dif + i].toLowerCase().equals("special") || line[dif + i].toLowerCase().equals("music")){
@@ -141,11 +148,13 @@ public class AnimeList {
 				if(endOfAltNames == -1) {
 					throw new Exception("Didn't find the image_url col");
 				}
+				
+				// Add all the alt names to the list of alt names
 				altNames = line[4];
 				for(int i = 5; i + dif < endOfAltNames; i++) {
 					altNames += ", " + line[dif + i];
 				}
-			} else {
+			} else { // If there are not alt names
 				altNames = line[dif + 4];
 				endOfAltNames = 5;
 			}
@@ -165,33 +174,35 @@ public class AnimeList {
 			
 			// The date that it began airing as YYYY or Mon DD, YYYY
 			if(line[dif + 11].substring(0,2).equals("19") || line[dif + 11].substring(0,2).equals("20")) { // "1980, 1990, 2000, or 2010  and  2000 to 2008
+				// 1980
 				if(line[dif + 11].length() == 4) {
 					anime.setAired_string(line[dif + 11]);
 					anime.setAired_stringYearOnly(true);
-				} else {
+				} else { // 1980 to *
 					anime.setAired_string(line[dif + 11].substring(0,4));
 					anime.setAired_stringYearOnly(true);
 				}
-			} else { // Oct 19, 2000 to Feb 20, 2002  or  Oct 19, 2000
+			} else { // Oct 19, 2000 to Feb 20, 2002 and Oct 19, 2000 to ? or  Oct 19, 2000 or Not available
 				String date1 = line[dif + 11];
 				String date2 = line[dif + 12];
 				
-				if(date1.equals("Not available")) {
+				if(date1.equals("Not available")) { // There is no date available
 					anime.setAired_string(date1);
 				} else {
 					if(date2.charAt(0) != ' ') {
 						throw new Exception("aired_string didn't have a space on the next line");
 					}
 
-					if(date2.length() == 5) {
+					if(date2.length() == 5) { // Oct 19, 2000
 						anime.setAired_string(date1.substring(1, date1.length()) + "," + date2.substring(0, date2.length()-1));
 						dif += 1;
-					} else {
+					} else { // Oct 19, 2000 to *
 						anime.setAired_string(date1.substring(1, date1.length()) + "," + date2.substring(0,5));
+						// Oct 19, 2000 to Feb 20, 2002
 						if((line[dif + 13].substring(0,3).equals(" 19") || line[dif + 13].substring(0,3).equals(" 20")) &&
 								(line[dif + 13]).charAt(line[dif + 13].length()-1) == '"') {
 							dif += 2;
-						} else {
+						} else { // Oct 19, 2000 to ?
 							dif += 1;
 						}
 					}
@@ -397,6 +408,7 @@ public class AnimeList {
 
 					edSongs += line[dif + i] + ", ";
 
+					// Get the number of quotes that have been found
 					int numQuotes = 0;
 					for(int j = 0; j < edSongs.length(); j++) {
 						if(edSongs.charAt(j) == '"') {
@@ -404,6 +416,7 @@ public class AnimeList {
 						}
 					}
 					
+					// If the last char is " AND all quotes have a matching quote
 					if(line[dif + i].charAt(line[dif + i].length()-1) == '"' && numQuotes % 2 == 0) {
 						break;
 					}
@@ -433,7 +446,7 @@ public class AnimeList {
 				numGoodLen++;
 			}
 			
-			animes.add(anime);
+			addAnime(anime);
 		}
 		} catch (Exception e) {
 			System.out.println("Fail happened after " + (numBadLen+numGoodLen));
@@ -442,6 +455,20 @@ public class AnimeList {
 		
 		System.out.println("There were " + numGoodLen + " good animes");
 		System.out.println("There were " + numBadLen + " bad animes");
+	}
+	
+	private static void addAnime(Anime anime) {
+		boolean notFound = true;
+		for(Anime examining : animes) {
+			if(examining.getAnime_id() == anime.getAnime_id()) {
+				notFound = false;
+				break;
+			}
+		}
+		
+		if(notFound) {
+			animes.add(anime);
+		}
 	}
 	
 }

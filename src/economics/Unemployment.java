@@ -7,6 +7,7 @@ public class Unemployment {
 	private String country_name, country_code;
 	
 	private static ArrayList<String> colNames;
+	private static ArrayList<Integer> years;
 	
 	public String toString() {
 		String output = "";
@@ -20,6 +21,13 @@ public class Unemployment {
 
 	public static void setColNames(ArrayList<String> _colNames) {
 		colNames = _colNames;
+		
+		years = new ArrayList<Integer>();
+		for(int i = 4; i < colNames.size(); i++) {
+			//System.out.println(colNames.get(i));
+			years.add(Integer.parseInt(colNames.get(i).substring(1, colNames.get(i).length()-1)));
+		}
+		
 	}
 	
 	public String getCountry_name() {
@@ -50,19 +58,27 @@ public class Unemployment {
 	public void addToYearlyUnemployment(String yearlyUnemploymentString) {
 		Double yearlyUnemployment;
 		if(yearlyUnemploymentString.equals("\"\"")) {
-			yearlyUnemployment = null;
+			yearlyUnemployment = -1.0;
 		} else {
 			yearlyUnemploymentString = yearlyUnemploymentString.substring(1, yearlyUnemploymentString.length()-1);
 			yearlyUnemployment = Double.parseDouble(yearlyUnemploymentString);
 		}
 		this.yearlyUnemployment.add(yearlyUnemployment);
 	}
+	public ArrayList<Double> getYearlyUnemployment() {
+		return yearlyUnemployment;
+	}
 	
 	public boolean isGood() {
 		boolean good = true;
-		if(yearlyUnemployment.size() + 3 != colNames.size()) {
+		if(yearlyUnemployment.size() + 5 != colNames.size()) {
+			System.out.println(yearlyUnemployment.size() + " : " + colNames.size());
 			good = false;
 		}
 		return good;
+	}
+	
+	public static ArrayList<Integer> getYears() {
+		return years;
 	}
 }

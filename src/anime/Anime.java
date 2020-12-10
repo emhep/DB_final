@@ -2,8 +2,8 @@ package anime;
 import java.util.ArrayList;
 
 public class Anime {
-	private String anime_id, title, title_english, title_japanese, title_synonyms, image_url, type, source, status, aired_string, aired, duration, rating, background, premiered, broadcast, related, producer, licensor, studio, genre, opening_theme, ending_theme;
-	private int episodes, duration_per_episode, scored_by, rank, popularity, members, favorites;
+	private String title, title_english, title_japanese, title_synonyms, image_url, type, source, status, aired_string, aired, duration, rating, background, premiered, broadcast, related, producer, licensor, studio, genre, opening_theme, ending_theme;
+	private Integer anime_id, episodes, duration_per_episode, scored_by, rank, popularity, members, favorites, year;
 	private boolean airing, aired_stringYearOnly = false;
 	private double score;
 	private ArrayList<String> miscCols = new ArrayList<String>();
@@ -11,10 +11,10 @@ public class Anime {
 	private static ArrayList<String> colNames;
 	
 	public Anime() {
-		setAll("", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", -1, -1, -1, -1, -1, -1, -1, false, false, -1);
+		setAll(0, "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", -1, -1, -1, -1, -1, -1, -1, false, false, -1);
 	}
 	
-	private void setAll(String anime_id, String title, String title_english, String title_japanese, String title_synonyms,
+	private void setAll(int anime_id, String title, String title_english, String title_japanese, String title_synonyms,
 			String image_url, String type, String source, String status, String aired_string, String aired,
 			String duration, String rating, String background, String premiered, String broadcast, String related,
 			String producer, String licensor, String studio, String genre, String opening_theme, String ending_theme,
@@ -111,11 +111,14 @@ public class Anime {
 		return output;
 	}
 	
-	public String getAnime_id() {
+	public int getAnime_id() {
 		return anime_id;
 	}
-	public void setAnime_id(String anime_id) {
+	public void setAnime_id(int anime_id) {
 		this.anime_id = anime_id;
+	}
+	public void setAnime_id(String anime_id) {
+		setAnime_id(Integer.parseInt(anime_id));
 	}
 	public String getTitle() {
 		return title;
@@ -168,7 +171,20 @@ public class Anime {
 	public String getAired_string() {
 		return aired_string;
 	}
+	public void setYear(Integer year) {
+		this.year = year;
+	}
+	public Integer getYear() {
+		return year;
+	}
 	public void setAired_string(String aired_string) {
+		if(aired_string.equals("Not available")) {
+			setYear(-1);
+		} else if(aired_string.length() == 4) {
+			setYear(Integer.parseInt(aired_string));
+		} else {
+			setYear(Integer.parseInt(aired_string.substring(aired_string.length()-4, aired_string.length())));
+		}
 		this.aired_string = aired_string;
 	}
 	public String getAired() {
